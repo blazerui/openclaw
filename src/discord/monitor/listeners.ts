@@ -76,13 +76,13 @@ export class DiscordMessageListener extends MessageCreateListener {
 
   async handle(data: DiscordMessageEvent, client: Client) {
     const startedAt = Date.now();
-    const task = Promise.resolve(this.handler(data, client));
-    void task
+    setImmediate(() => {
+      const task = Promise.resolve(this.handler(data, client));
+      void task
       .catch((err) => {
         const logger = this.logger ?? discordEventQueueLog;
         logger.error(danger(`discord handler failed: ${String(err)}`));
-      })
-      .finally(() => {
+      })      .finally(() => {
         logSlowDiscordListener({
           logger: this.logger,
           listener: this.constructor.name,
@@ -90,6 +90,7 @@ export class DiscordMessageListener extends MessageCreateListener {
           durationMs: Date.now() - startedAt,
         });
       });
+    });
   }
 }
 
